@@ -129,9 +129,11 @@ open class MapCache : MapCacheProtocol {
             self.fetchTileFromServer(at: path,
                                 failure: {error in result(nil, error)},
                                 success: {data in
-                                    self.diskCache.setDataSync(data, forKey: key)
-                                               print ("MapCache::fetchTileFromServer:: Data received saved cacheKey=\(key)" )
-                                    result(data, nil)})
+                self.diskCache.setData(data, forKey: key) {
+                    print ("MapCache::fetchTileFromServer:: Data received saved cacheKey=\(key)" )
+                    result(data, nil)}
+                }
+            )
         }
         
         // Tries to load the tile from the cache.

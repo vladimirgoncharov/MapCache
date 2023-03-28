@@ -98,9 +98,10 @@ open class DiskCache {
     
     /// Sets the data for the key asyncronously.
     /// Use this function for writing into the cache.
-    open func setData( _ data: Data, forKey key: String) {
+    open func setData( _ data: Data, forKey key: String, completion: (() -> Void)?) {
         cacheQueue.async(execute: {
             self.setDataSync(data, forKey: key)
+            completion?()
         })
     }
     
