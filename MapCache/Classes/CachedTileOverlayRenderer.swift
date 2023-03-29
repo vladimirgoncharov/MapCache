@@ -57,16 +57,18 @@ open class CachedTileOverlayRenderer: MKTileOverlayRenderer {
                         ?? CGImage(pngDataProviderSource: provider, decode: nil, shouldInterpolate: false, intent: CGColorRenderingIntent.defaultIntent)
                 else { return }
                 
-                let tileScaleFactor = CGFloat(tile.overZoom) / zoomScale
-                let cgRect = strongSelf.rect(for: tile.rect)
-                let drawRect = CGRect(x: 0, y: 0, width: CGFloat(image.width), height: CGFloat(image.height))
-                context.saveGState()
-                context.translateBy(x: cgRect.minX, y: cgRect.minY)
-                context.scaleBy(x: tileScaleFactor, y: tileScaleFactor)
-                context.translateBy(x: 0, y: CGFloat(image.height))
-                context.scaleBy(x: 1, y: -1)
-                context.draw(image, in: drawRect)
-                context.restoreGState()
+                DispatchQueue.main.async {
+                    let tileScaleFactor = CGFloat(tile.overZoom) / zoomScale
+                    let cgRect = strongSelf.rect(for: tile.rect)
+                    let drawRect = CGRect(x: 0, y: 0, width: CGFloat(image.width), height: CGFloat(image.height))
+                    context.saveGState()
+                    context.translateBy(x: cgRect.minX, y: cgRect.minY)
+                    context.scaleBy(x: tileScaleFactor, y: tileScaleFactor)
+                    context.translateBy(x: 0, y: CGFloat(image.height))
+                    context.scaleBy(x: 1, y: -1)
+                    context.draw(image, in: drawRect)
+                    context.restoreGState()
+                }
             }
         }
     }
