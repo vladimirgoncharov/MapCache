@@ -78,8 +78,4 @@ public struct ZoomRange : Sequence {
     public func makeIterator() -> ZoomRangeIterator{
         return ZoomRangeIterator(self)
     }
-    
-    public func contains(_ zoom: Zoom) -> Bool {
-        return min <= zoom && zoom <= max
-    }
 }

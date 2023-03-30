@@ -226,13 +226,6 @@ open class DiskCache {
         return currentSize
     }
     
-    /// Determine if the tile has been cached
-     open func exists(forKey key: String) -> Bool {
-         let path = self.path(forKey: key)
-         let fileManager = FileManager.default
-         return fileManager.fileExists(atPath: path)
-     }
-    
     // MARK: Private
     
     /// It checks if the capacity of the cache has been reached. If so, it removes the least recently used file (LRU).

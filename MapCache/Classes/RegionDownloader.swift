@@ -34,9 +34,6 @@ import MapKit
     /// Cache that is going to be used for saving/loading the files.
     public let mapCache: MapCacheProtocol
     
-    /// Whether to check and update downloaded tiles
-     public let update: Bool
-    
     /// Total number of tiles to be downloaded.
     public var totalTilesToDownload: TileNumber {
         get {
@@ -53,9 +50,6 @@ import MapKit
     
     /// The variable that actually keeps the count of the downloaded bytes.
     private var _downloadedBytes: UInt64 = 0
-    
-    /// Indicates that the download has been canceled
-    private var _stoped = false
     
     /// Total number of downloaded data bytes.
     public var downloadedBytes: UInt64 {
@@ -145,10 +139,9 @@ import MapKit
     ///  - Parameter forRegion: the region to be downloaded.
     ///  - Parameter mapCache: the `MapCache` implementation used to download and store the downloaded data
     ///
-    public init(forRegion region: TileCoordsRegion, mapCache: MapCacheProtocol, update: Bool = false) {
+    public init(forRegion region: TileCoordsRegion, mapCache: MapCacheProtocol) {
         self.region = region
         self.mapCache = mapCache
-        self.update = update
     }
     
     /// Resets downloader counters.
@@ -165,23 +158,11 @@ import MapKit
         //Downloads stuff
         resetCounters()
         downloaderQueue.async {
-            /// Limit the number of tasks
-            let semaphore = DispatchSemaphore(value: 30)
             for range: TileRange in self.region.tileRanges() ?? [] {
                 for tileCoords: TileCoords in range {
-                    if self._stoped {
-                        return
-                    }
-                    while semaphore.wait(timeout: DispatchTime(after: 10)) == .timedOut {
-                        if self._stoped {
-                            return
-                        }
-                    }
-                    
                     ///Add to the download queue.
                     let mktileOverlayPath = MKTileOverlayPath(tileCoords: tileCoords)
-                    self.mapCache.cacheTile(at: mktileOverlayPath, update: self.update, result: { size, error in
-                        semaphore.signal()
+                    self.mapCache.loadTile(at: mktileOverlayPath, result: {data,error in
                         if error != nil {
                             print(error?.localizedDescription ?? "Error downloading tile")
                             self._failedTileDownloads += 1
@@ -189,7 +170,6 @@ import MapKit
                             // so a retry can be performed
                         } else {
                             self._successfulTileDownloads += 1
-                            self._downloadedBytes += UInt64(size)
                             print("RegionDownloader:: Donwloaded zoom: \(tileCoords.zoom) (x:\(tileCoords.tileX),y:\(tileCoords.tileY)) \(self.downloadedTiles)/\(self.totalTilesToDownload) \(self.downloadedPercentage)%")
                             
                         }
@@ -211,20 +191,9 @@ import MapKit
         }
     }
     
-    /// Stop download.
-     public func stop() {
-         _stoped = true
-     }
-    
     /// Returns an estimation of the total number of bytes the whole region may occupy.
     /// Again, it is an estimation.
     public func estimateRegionByteSize() -> UInt64 {
         return RegionDownloader.defaultAverageTileSizeBytes * self.region.count
     }
 }
-
-public extension DispatchTime {
-     init(after: TimeInterval) {
-         self.init(uptimeNanoseconds:DispatchTime.now().uptimeNanoseconds + UInt64(after * 1000000000))
-     }
- }
