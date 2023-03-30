@@ -15,6 +15,10 @@ import MapKit
 ///
 /// - SeeAlso: https://medium.com/@johnsundell/mocking-in-swift-56a913ee7484
 class MapCacheMock : MapCacheProtocol {
+    func cacheTile(at path: MKTileOverlayPath, update: Bool, result: @escaping (Int, Error?) -> Void) {
+        
+    }
+    
     
     /// It is not being used but It is required by the protocol.
     func url(forTilePath path: MKTileOverlayPath) -> URL {

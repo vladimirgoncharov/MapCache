@@ -74,18 +74,20 @@ class DiskCacheSpecs: QuickSpec {
             it("can add a file") {
                 let data = data1
                 let filename = filename1
-                diskCache.setData(data!, forKey: filename)
-                let filePath = diskCache.folderURL.appendingPathComponent(filename.toMD5()).path
-                expect(FileManager.default.fileExists(atPath: filePath)).toEventually(equal(true))
+                diskCache.setData(data!, forKey: filename, completion: {
+                    let filePath = diskCache.folderURL.appendingPathComponent(filename.toMD5()).path
+                    expect(FileManager.default.fileExists(atPath: filePath)).toEventually(equal(true))
+                })
             }
             
             it("can add a file with a very long name") {
                 let data = dataLongFile
                 let filename = longFileName
                 
-                diskCache.setData(data!, forKey: filename)
-                let filePath = diskCache.folderURL.appendingPathComponent(filename.MD5Filename()).path
-                expect(FileManager.default.fileExists(atPath: filePath)).toEventually(equal(true), timeout: .seconds(2))
+                diskCache.setData(data!, forKey: filename, completion: {
+                    let filePath = diskCache.folderURL.appendingPathComponent(filename.MD5Filename()).path
+                    expect(FileManager.default.fileExists(atPath: filePath)).toEventually(equal(true), timeout: .seconds(2))
+                })
             }
             
             it("keeps track of its disk size") {

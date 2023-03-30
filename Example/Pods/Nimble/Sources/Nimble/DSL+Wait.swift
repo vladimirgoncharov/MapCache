@@ -1,3 +1,5 @@
+#if !os(WASI)
+
 import Dispatch
 import Foundation
 
@@ -44,7 +46,6 @@ internal class NMBWait: NSObject {
         action: @escaping (@escaping () -> Void) throws -> Void) {
             let awaiter = NimbleEnvironment.activeInstance.awaiter
             let leeway = timeout.divided
-            // swiftlint:disable:next line_length
             let result = awaiter.performBlock(file: file, line: line) { (done: @escaping (ErrorResult) -> Void) throws -> Void in
                 DispatchQueue.main.async {
                     let capture = NMBExceptionCapture(
@@ -115,6 +116,9 @@ internal func blockedRunLoopErrorMessageFor(_ fnName: String, leeway: DispatchTi
 /// 
 /// This function manages the main run loop (`NSRunLoop.mainRunLoop()`) while this function
 /// is executing. Any attempts to touch the run loop may cause non-deterministic behavior.
+@available(*, noasync, message: "the sync version of `waitUntil` does not work in async contexts. Use the async version with the same name as a drop-in replacement")
 public func waitUntil(timeout: DispatchTimeInterval = AsyncDefaults.timeout, file: FileString = #file, line: UInt = #line, action: @escaping (@escaping () -> Void) -> Void) {
     NMBWait.until(timeout: timeout, file: file, line: line, action: action)
 }
+
+#endif // #if !os(WASI)
